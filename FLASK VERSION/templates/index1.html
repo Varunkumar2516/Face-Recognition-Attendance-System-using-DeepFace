@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Recognition Attendance System</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  
+ </head>
+ <body class="h-full">
+  <div id="app" style="display:flex;height:100%;overflow:hidden">
+   <!-- Sidebar -->
+   <aside id="sidebar" class="sidebar scrollbar-thin">
+    <div style="padding:20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);margin-bottom:8px">
+     <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6366f1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <i data-lucide="scan-face" style="width:20px;height:20px;color:#fff"></i>
+     </div><span class="sidebar-header-text" style="font-weight:700;font-size:15px" id="sidebarTitle">FaceAttend</span>
+    </div>
+    <nav>
+     <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+      <i data-lucide="layout-dashboard" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Dashboard</span>
+     </div>
+     <div class="nav-item" data-page="students" onclick="navigateTo('students')">
+      <i data-lucide="users" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Students</span>
+     </div>
+     <div class="nav-item" data-page="teachers" onclick="navigateTo('teachers')">
+      <i data-lucide="user-check" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Teachers</span>
+     </div>
+     <div class="nav-item" data-page="detection" onclick="navigateTo('detection')">
+      <i data-lucide="scan-face" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Face Detection</span>
+     </div>
+     <div class="nav-item" data-page="attendance" onclick="navigateTo('attendance')">
+      <i data-lucide="clipboard-check" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Attendance Logs</span>
+     </div>
+     <div class="nav-item" data-page="train" onclick="navigateTo('train')">
+      <i data-lucide="brain" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Train Model</span>
+     </div>
+     <div class="nav-item" data-page="dataset" onclick="navigateTo('dataset')">
+      <i data-lucide="image" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Dataset</span>
+     </div>
+     <div class="nav-item" data-page="developer" onclick="navigateTo('developer')">
+      <i data-lucide="code-2" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Developer</span>
+     </div>
+     <div style="border-top:1px solid var(--border);margin:8px"></div>
+     <div class="nav-item" data-page="settings" onclick="navigateTo('settings')">
+      <i data-lucide="settings" style="width:20px;height:20px;flex-shrink:0"></i><span class="nav-text">Settings</span>
+     </div>
+    </nav>
+   </aside><!-- Main Content -->
+   <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+    <!-- Top Navbar -->
+    <header style="background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+     <div style="display:flex;align-items:center;gap:16px">
+      <button onclick="toggleSidebar()" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:4px"><i data-lucide="menu" style="width:22px;height:22px"></i></button>
+      <h1 style="font-size:18px;font-weight:700" id="navTitle">Face Recognition System</h1>
+     </div>
+     <div style="display:flex;align-items:center;gap:12px">
+      <div style="position:relative">
+       <input type="text" placeholder="Search..." id="globalSearch" style="width:200px;padding:8px 14px 8px 36px;font-size:13px"> <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text2)"></i>
+      </div><button onclick="toggleTheme()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;cursor:pointer;color:var(--text2)"> <i data-lucide="sun" id="themeIcon" style="width:18px;height:18px"></i> </button> <button onclick="showToast('Notifications coming soon','info')" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;cursor:pointer;color:var(--text2);position:relative"> <i data-lucide="bell" style="width:18px;height:18px"></i> <span style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#ef4444;border-radius:50%"></span> </button>
+      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6366f1);display:flex;align-items:center;justify-content:center;cursor:pointer">
+       <i data-lucide="user" style="width:18px;height:18px;color:#fff"></i>
+      </div>
+     </div>
+    </header><!-- Pages Container -->
+    <div style="flex:1;overflow:hidden">
+     <!-- Dashboard -->
+     <div id="page-dashboard" class="page active scrollbar-thin">
+      <div style="margin-bottom:24px">
+       <h2 style="font-size:28px;font-weight:800" id="welcomeMsg">Welcome, Admin</h2>
+       <p style="color:var(--text2);margin-top:4px">Face Recognition Attendance System Dashboard</p>
+      </div><!-- Stats Row -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px">
+       <div class="glass" style="padding:20px;display:flex;align-items:center;gap:16px">
+        <div class="icon-circle" style="background:rgba(59,130,246,.15)"><i data-lucide="users" style="width:24px;height:24px;color:var(--accent)"></i>
+        </div>
+        <div>
+         <div style="font-size:24px;font-weight:800">
+          142
+         </div>
+         <div style="color:var(--text2);font-size:13px">
+          Total Students
+         </div>
+        </div>
+       </div>
+       <div class="glass" style="padding:20px;display:flex;align-items:center;gap:16px">
+        <div class="icon-circle" style="background:rgba(34,197,94,.15)"><i data-lucide="check-circle" style="width:24px;height:24px;color:var(--accent2)"></i>
+        </div>
+        <div>
+         <div style="font-size:24px;font-weight:800">
+          128
+         </div>
+         <div style="color:var(--text2);font-size:13px">
+          Present Today
+         </div>
+        </div>
+       </div>
+       <div class="glass" style="padding:20px;display:flex;align-items:center;gap:16px">
+        <div class="icon-circle" style="background:rgba(239,68,68,.15)"><i data-lucide="x-circle" style="width:24px;height:24px;color:#ef4444"></i>
+        </div>
+        <div>
+         <div style="font-size:24px;font-weight:800">
+          14
+         </div>
+         <div style="color:var(--text2);font-size:13px">
+          Absent Today
+         </div>
+        </div>
+       </div>
+       <div class="glass" style="padding:20px;display:flex;align-items:center;gap:16px">
+        <div class="icon-circle" style="background:rgba(168,85,247,.15)"><i data-lucide="brain" style="width:24px;height:24px;color:#a855f7"></i>
+        </div>
+        <div>
+         <div style="font-size:24px;font-weight:800">
+          98.2%
+         </div>
+         <div style="color:var(--text2);font-size:13px">
+          Model Accuracy
+         </div>
+        </div>
+       </div>
+      </div><!-- Quick Action Cards -->
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text2)">Quick Actions</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px">
+       <div class="card animate-in stagger-1" onclick="navigateTo('students')">
+        <div class="icon-circle" style="background:rgba(59,130,246,.15);margin-bottom:16px"><i data-lucide="user-plus" style="width:24px;height:24px;color:var(--accent)"></i>
+        </div>
+        <div style="font-weight:700;font-size:15px">
+         Student Details
+        </div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px">
+         Manage student records
+        </div>
+       </div>
+       <div class="card animate-in stagger-1" onclick="navigateTo('teachers')">
+        <div class="icon-circle" style="background:rgba(59,130,246,.15);margin-bottom:16px"><i data-lucide="user-plus" style="width:24px;height:24px;color:var(--accent)"></i>
+        </div>
+        <div style="font-weight:700;font-size:15px">
+         Teachers Details
+        </div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px">
+         Manage Teachers records
+        </div>
+       </div>
+       <div class="card animate-in stagger-2" onclick="navigateTo('detection')">
+        <div class="icon-circle" style="background:rgba(34,197,94,.15);margin-bottom:16px"><i data-lucide="scan-face" style="width:24px;height:24px;color:var(--accent2)"></i>
+        </div>
+        <div style="font-weight:700;font-size:15px">
+         Face Detection
+        </div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px">
+         Start live recognition
+        </div>
+       </div>
+       <div class="card animate-in stagger-3" onclick="navigateTo('attendance')">
+        <div class="icon-circle" style="background:rgba(168,85,247,.15);margin-bottom:16px"><i data-lucide="clipboard-check" style="width:24px;height:24px;color:#a855f7"></i>
+        </div>
+        <div style="font-weight:700;font-size:15px">
+         Attendance
+        </div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px">
+         View attendance logs
+        </div>
+       </div>
+       <div class="card animate-in stagger-4" onclick="navigateTo('train')">
+        <div class="icon-circle" style="background:rgba(245,158,11,.15);margin-bottom:16px"><i data-lucide="brain" style="width:24px;height:24px;color:#f59e0b"></i>
+        </div>
+        <div style="font-weight:700;font-size:15px">
+         Train Model
+        </div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px">
+         Retrain face model
+        </div>
+       </div>
+       <div class="card animate-in stagger-5" onclick="navigateTo('dataset')">
+        <div class="icon-circle" style="background:rgba(236,72,153,.15);margin-bottom:16px"><i data-lucide="image" style="width:24px;height:24px;color:#ec4899"></i>
+        </div>
+        <div style="font-weight:700;font-size:15px">
+         Photos Dataset
+        </div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px">
+         Manage face images
+        </div>
+       </div>
+       <div class="card animate-in stagger-5" onclick="navigateTo('developer')">
+        <div class="icon-circle" style="background:rgba(6,182,212,.15);margin-bottom:16px"><i data-lucide="code-2" style="width:24px;height:24px;color:#06b6d4"></i>
+        </div>
+        <div style="font-weight:700;font-size:15px">
+         Developer Info
+        </div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px">
+         About the developer
+        </div>
+       </div>
+      </div><!-- Recent Activity -->
+      <h3 style="font-size:16px;font-weight:700;margin:24px 0 16px;color:var(--text2)">Recent Activity</h3>
+      <div class="glass" style="padding:0;overflow:hidden;border-radius:16px">
+       <table>
+        <thead>
+         <tr>
+          <th>Student</th>
+          <th>Action</th>
+          <th>Time</th>
+          <th>Status</th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr>
+          <td style="font-weight:600">Arjun Patel</td>
+          <td>Face Recognized</td>
+          <td>09:02 AM</td>
+          <td><span class="badge badge-present">Present</span></td>
+         </tr>
+         <tr>
+          <td style="font-weight:600">Priya Sharma</td>
+          <td>Face Recognized</td>
+          <td>09:05 AM</td>
+          <td><span class="badge badge-present">Present</span></td>
+         </tr>
+         <tr>
+          <td style="font-weight:600">Rahul Kumar</td>
+          <td>Not Detected</td>
+          <td>—</td>
+          <td><span class="badge badge-absent">Absent</span></td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div><!-- Students Page -->
+     <div id="page-students" class="page scrollbar-thin">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+       <h2 style="font-size:24px;font-weight:800">Student Management</h2><button class="btn btn-primary" onclick="document.getElementById('studentModal').classList.add('show')"><i data-lucide="user-plus" style="width:16px;height:16px"></i> Add Student</button>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+       <input type="text" id="studentSearch" placeholder="Search students..." oninput="filterStudents()" style="flex:1;min-width:200px"> <select id="courseFilter" onchange="filterStudents()" style="min-width:140px"> <option value="">All Courses</option><option>Computer Science</option><option>Information Tech</option><option>Electronics</option><option>Mechanical</option> </select>
+      </div>
+      <div class="glass" style="padding:0;overflow:auto;border-radius:16px">
+       <table id="studentTable">
+        <thead>
+         <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Course</th>
+          <th>Year</th>
+          <th>Email</th>
+          <th>Actions</th>
+         </tr>
+        </thead>
+        <tbody id="studentBody"></tbody>
+       </table>
+      </div>
+     </div><!-- Teachers Page -->
+     <div id="page-teachers" class="page scrollbar-thin">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+       <h2 style="font-size:24px;font-weight:800">Teacher Management</h2><button class="btn btn-primary" onclick="document.getElementById('teacherModal').classList.add('show')"><i data-lucide="user-plus" style="width:16px;height:16px"></i> Add Teacher</button>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+       <input type="text" id="teacherSearch" placeholder="Search teachers..." oninput="filterTeachers()" style="flex:1;min-width:200px"> <select id="departmentFilter" onchange="filterTeachers()" style="min-width:140px"> <option value="">All Departments</option><option>Computer Science</option><option>Information Tech</option><option>Electronics</option><option>Mechanical</option> </select>
+      </div>
+      <div class="glass" style="padding:0;overflow:auto;border-radius:16px">
+       <table id="teacherTable">
+        <thead>
+         <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Designation</th>
+          <th>Email</th>
+          <th>Actions</th>
+         </tr>
+        </thead>
+        <tbody id="teacherBody"></tbody>
+       </table>
+      </div>
+     </div><!-- Face Detection Page -->
+     <div id="page-detection" class="page scrollbar-thin">
+      <h2 style="font-size:24px;font-weight:800;margin-bottom:24px">Face Detection</h2>
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start" class="detection-grid">
+       <div>
+        <div class="camera-frame" id="cameraFrame">
+         <div class="scan-line" id="scanLine" style="display:none"></div>
+         <div id="cameraPlaceholder" style="text-align:center">
+          <i data-lucide="camera" style="width:48px;height:48px;color:var(--text2);margin-bottom:12px"></i>
+          <div style="color:var(--text2);font-size:14px">
+           Camera feed will appear here
+          </div>
+         </div>
+         <div id="cameraActive" style="display:none;text-align:center">
+          <div class="spinner" style="margin:0 auto 12px"></div>
+          <div style="color:var(--accent);font-weight:600;font-size:14px" id="detectionStatus">
+           Scanning...
+          </div>
+         </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:16px">
+         <button class="btn btn-success" id="startDetBtn" onclick="startDetection()"><i data-lucide="play" style="width:16px;height:16px"></i> Start Detection</button> <button class="btn btn-danger" id="stopDetBtn" onclick="stopDetection()" disabled><i data-lucide="square" style="width:16px;height:16px"></i> Stop</button>
+        </div>
+       </div>
+       <div class="glass" style="padding:20px">
+        <h3 style="font-weight:700;margin-bottom:16px;font-size:15px">Detection Log</h3>
+        <div id="detectionLog" style="display:flex;flex-direction:column;gap:8px">
+         <div style="color:var(--text2);font-size:13px;text-align:center;padding:20px">
+          No detections yet
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Attendance Page -->
+     <div id="page-attendance" class="page scrollbar-thin">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+       <h2 style="font-size:24px;font-weight:800">Attendance Logs</h2><button class="btn btn-primary" onclick="exportCSV()"><i data-lucide="download" style="width:16px;height:16px"></i> Export CSV</button>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+       <input type="date" id="dateFilter" onchange="filterAttendance()" style="min-width:160px"> <select id="attCourseFilter" onchange="filterAttendance()" style="min-width:140px"> <option value="">All Courses</option><option>Computer Science</option><option>Information Tech</option><option>Electronics</option> </select> <select id="statusFilter" onchange="filterAttendance()" style="min-width:120px"> <option value="">All Status</option><option>Present</option><option>Absent</option> </select>
+      </div>
+      <div class="glass" style="padding:0;overflow:auto;border-radius:16px">
+       <table>
+        <thead>
+         <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Course</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Status</th>
+         </tr>
+        </thead>
+        <tbody id="attendanceBody"></tbody>
+       </table>
+      </div>
+     </div><!-- Train Model Page -->
+     <div id="page-train" class="page scrollbar-thin">
+      <h2 style="font-size:24px;font-weight:800;margin-bottom:24px">Train Model</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" class="train-grid">
+       <div class="glass" style="padding:24px">
+        <h3 style="font-weight:700;margin-bottom:20px">Training Configuration</h3>
+        <div style="margin-bottom:16px">
+         <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text2)">Dataset Size</label>
+         <div style="font-size:24px;font-weight:800">
+          1,420 <span style="font-size:14px;color:var(--text2);font-weight:500">images</span>
+         </div>
+        </div>
+        <div style="margin-bottom:16px">
+         <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text2)">Students Enrolled</label>
+         <div style="font-size:24px;font-weight:800">
+          142
+         </div>
+        </div>
+        <div style="margin-bottom:20px">
+         <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text2)">Algorithm</label>
+         <div style="font-size:15px;font-weight:600">
+          LBPH Face Recognizer
+         </div>
+        </div><button class="btn btn-primary" id="trainBtn" onclick="trainModel()" style="width:100%;justify-content:center"><i data-lucide="zap" style="width:16px;height:16px"></i> Start Training</button>
+       </div>
+       <div class="glass" style="padding:24px">
+        <h3 style="font-weight:700;margin-bottom:20px">Training Progress</h3>
+        <div style="margin-bottom:16px">
+         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:13px;color:var(--text2)">Progress</span> <span style="font-size:13px;font-weight:700" id="trainPercent">0%</span>
+         </div>
+         <div class="progress-bar">
+          <div class="progress-fill" id="trainProgress" style="width:0%"></div>
+         </div>
+        </div>
+        <div id="trainLogs" style="background:var(--surface);border-radius:10px;padding:16px;max-height:240px;overflow-y:auto;font-family:monospace;font-size:12px;color:var(--text2)">
+         <div>
+          $ Awaiting training command...
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Dataset Page -->
+     <div id="page-dataset" class="page scrollbar-thin">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+       <h2 style="font-size:24px;font-weight:800">Photo Dataset</h2>
+       <div style="display:flex;gap:12px">
+        <button class="btn btn-primary" onclick="showToast('Upload feature connects to backend','info')"><i data-lucide="upload" style="width:16px;height:16px"></i> Upload</button> <button class="btn btn-danger" onclick="showToast('Select photos to delete','info')"><i data-lucide="trash-2" style="width:16px;height:16px"></i> Delete Selected</button>
+       </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:20px">
+       <input type="text" placeholder="Search by student name..." style="flex:1"> <select style="min-width:140px"><option>All Students</option></select>
+      </div>
+      <div class="photo-grid" id="photoGrid"></div>
+     </div><!-- Developer Page -->
+     <div id="page-developer" class="page scrollbar-thin">
+      <h2 style="font-size:24px;font-weight:800;margin-bottom:24px">Developer</h2>
+      <div style="max-width:560px;margin:0 auto">
+       <div class="glass" style="padding:32px;text-align:center">
+        <div style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#6366f1,#a855f7);margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+         <i data-lucide="code-2" style="width:40px;height:40px;color:#fff"></i>
+        </div>
+        <h3 style="font-size:22px;font-weight:800" id="devName">Alex Chen</h3>
+        <p style="color:var(--accent);font-weight:600;margin:4px 0 16px" id="devRole">Full Stack Developer &amp; AI Engineer</p>
+        <p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:24px">Passionate about building intelligent systems that solve real-world problems. This Face Recognition Attendance System was built as a college project combining computer vision with modern web technologies.</p>
+        <div style="display:flex;justify-content:center;gap:12px">
+         <button class="btn btn-outline" onclick="showToast('GitHub link opens in production','info')"><i data-lucide="github" style="width:16px;height:16px"></i> GitHub</button> <button class="btn btn-outline" onclick="showToast('LinkedIn link opens in production','info')"><i data-lucide="linkedin" style="width:16px;height:16px"></i> LinkedIn</button> <button class="btn btn-outline" onclick="showToast('Portfolio link opens in production','info')"><i data-lucide="globe" style="width:16px;height:16px"></i> Portfolio</button>
+        </div>
+       </div>
+       <div class="glass" style="padding:24px;margin-top:16px">
+        <h4 style="font-weight:700;margin-bottom:16px">Tech Stack</h4>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+         <span class="badge" style="background:rgba(59,130,246,.15);color:var(--accent)">Python</span> <span class="badge" style="background:rgba(34,197,94,.15);color:var(--accent2)">OpenCV</span> <span class="badge" style="background:rgba(168,85,247,.15);color:#a855f7">Flask</span> <span class="badge" style="background:rgba(245,158,11,.15);color:#f59e0b">TensorFlow</span> <span class="badge" style="background:rgba(236,72,153,.15);color:#ec4899">HTML/CSS/JS</span> <span class="badge" style="background:rgba(6,182,212,.15);color:#06b6d4">MySQL</span>
+        </div>
+       </div>
+      </div>
+     </div><!-- Settings Page -->
+     <div id="page-settings" class="page scrollbar-thin">
+      <h2 style="font-size:24px;font-weight:800;margin-bottom:24px">Settings</h2>
+      <div style="max-width:600px">
+       <div class="glass" style="padding:24px;margin-bottom:16px">
+        <h3 style="font-weight:700;margin-bottom:16px">Appearance</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+         <div>
+          <div style="font-weight:600">
+           Dark Mode
+          </div>
+          <div style="color:var(--text2);font-size:13px">
+           Toggle between light and dark themes
+          </div>
+         </div><button class="btn btn-outline" onclick="toggleTheme()" id="themeToggleBtn">Switch Theme</button>
+        </div>
+       </div>
+       <div class="glass" style="padding:24px;margin-bottom:16px">
+        <h3 style="font-weight:700;margin-bottom:16px">Camera Settings</h3>
+        <div style="margin-bottom:12px">
+         <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text2)">Camera Resolution</label> <select style="width:100%"><option>1280 x 720 (HD)</option><option>1920 x 1080 (Full HD)</option><option>640 x 480 (SD)</option></select>
+        </div>
+        <div>
+         <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text2)">Confidence Threshold</label> <input type="range" min="50" max="99" value="75" style="width:100%;accent-color:var(--accent)">
+        </div>
+       </div>
+       <div class="glass" style="padding:24px">
+        <h3 style="font-weight:700;margin-bottom:16px">System</h3><button class="btn btn-danger" onclick="showToast('Cache cleared','success')"><i data-lucide="trash-2" style="width:16px;height:16px"></i> Clear Cache</button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- Student Modal - Enhanced Form -->
+  <div class="modal-overlay" id="studentModal" style="align-items:stretch;justify-content:center;padding:20px">
+   <div class="modal" style="max-width:1000px;width:100%;height:90%;max-height:90vh;padding:0;display:flex;flex-direction:column;border-radius:20px">
+    <!-- Modal Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:24px;border-bottom:1px solid var(--border);flex-shrink:0">
+     <div>
+      <h2 style="font-weight:800;font-size:22px" id="modalTitle">Student Registration Form</h2>
+      <p style="color:var(--text2);font-size:13px;margin-top:4px">Fill in all student details below</p>
+     </div><button onclick="closeStudentModal()" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:8px"><i data-lucide="x" style="width:24px;height:24px"></i></button>
+    </div><!-- Form Content -->
+    <div style="flex:1;overflow-y:auto;padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+     <form id="studentForm" onsubmit="handleStudentSubmit(event)" style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <input type="hidden" id="editIndex" value="-1"> <!-- LEFT SECTION: Course Information -->
+      <div style="grid-column:1/-1">
+       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:32px;height:32px;border-radius:10px;background:rgba(59,130,246,.15);display:flex;align-items:center;justify-content:center"><i data-lucide="book-open" style="width:18px;height:18px;color:var(--accent)"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:16px">Course Information</h3>
+       </div>
+       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;background:var(--glass);padding:20px;border-radius:14px;border:1px solid var(--border)">
+        <div>
+         <label for="sCourseType" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Course Type</label> <select id="sCourseType" required style="width:100%"><option value="">Select Course Type</option><option>Bachelor's</option><option>Master's</option><option>Diploma</option></select>
+        </div>
+        <div>
+         <label for="sDepartment" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Department</label> <select id="sDepartment" required style="width:100%"><option value="">Select Department</option><option>Computer Science</option><option>Information Tech</option><option>Electronics</option><option>Mechanical</option></select>
+        </div>
+        <div>
+         <label for="sSection" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Section</label> <select id="sSection" required style="width:100%"><option value="">Select Section</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        </div>
+        <div>
+         <label for="sBatch" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Batch</label> <select id="sBatch" required style="width:100%"><option value="">Select Batch</option><option>2021-2025</option><option>2022-2026</option><option>2023-2027</option><option>2024-2028</option></select>
+        </div>
+        <div>
+         <label for="sYear" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Year</label> <select id="sYear" required style="width:100%"><option value="">Select Year</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select>
+        </div>
+        <div>
+         <label for="sSemester" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Semester</label> <select id="sSemester" required style="width:100%"><option value="">Select Semester</option><option>1st</option><option>2nd</option><option>3rd</option><option>4th</option><option>5th</option><option>6th</option><option>7th</option><option>8th</option></select>
+        </div>
+       </div>
+      </div><!-- MIDDLE SECTION: Student Information -->
+      <div style="grid-column:1/-1">
+       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:32px;height:32px;border-radius:10px;background:rgba(34,197,94,.15);display:flex;align-items:center;justify-content:center"><i data-lucide="user" style="width:18px;height:18px;color:var(--accent2)"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:16px">Student Information</h3>
+       </div>
+       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;background:var(--glass);padding:20px;border-radius:14px;border:1px solid var(--border)">
+        <div>
+         <label for="sId" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Student ID <span style="color:var(--accent)">*</span></label> <input type="text" id="sId" placeholder="Auto-generated" readonly style="width:100%;background:var(--surface2);opacity:.7">
+        </div>
+        <div>
+         <label for="sName" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Full Name <span style="color:var(--accent)">*</span></label> <input type="text" id="sName" placeholder="e.g., Arjun Patel" required style="width:100%">
+        </div>
+        <div>
+         <label for="sClassRoll" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Class Roll No <span style="color:var(--accent)">*</span></label> <input type="number" id="sClassRoll" placeholder="e.g., 1" required style="width:100%">
+        </div>
+        <div>
+         <label for="sUniversityRoll" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">University Roll No <span style="color:var(--accent)">*</span></label> <input type="text" id="sUniversityRoll" placeholder="e.g., 2021CS001" required style="width:100%">
+        </div>
+        <div>
+         <label for="sGender" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Gender</label> <select id="sGender" style="width:100%"><option value="">Select Gender</option><option>Male</option><option>Female</option><option>Other</option></select>
+        </div>
+        <div>
+         <label for="sDOB" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Date of Birth</label> <input type="date" id="sDOB" style="width:100%">
+        </div>
+        <div>
+         <label for="sPhone" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Phone Number</label> <input type="tel" id="sPhone" placeholder="e.g., +91 9876543210" style="width:100%">
+        </div>
+        <div>
+         <label for="sEmail" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Email ID <span style="color:var(--accent)">*</span></label> <input type="email" id="sEmail" placeholder="e.g., arjun@college.edu" required style="width:100%">
+        </div>
+       </div>
+      </div><!-- PHOTO SECTION -->
+      <div style="grid-column:1/-1">
+       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:32px;height:32px;border-radius:10px;background:rgba(168,85,247,.15);display:flex;align-items:center;justify-content:center"><i data-lucide="camera" style="width:18px;height:18px;color:#a855f7"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:16px">Photo Sample</h3>
+       </div>
+       <div style="background:var(--glass);padding:20px;border-radius:14px;border:1px solid var(--border)">
+        <div style="display:flex;gap:24px">
+         <label style="display:flex;align-items:center;gap:10px;cursor:pointer"> <input type="radio" name="photoOption" value="capture" id="photoCapture" checked style="cursor:pointer;width:18px;height:18px;accent-color:var(--accent)"> <span style="font-weight:600;color:var(--text)">Capture Photo Sample</span> </label> <label style="display:flex;align-items:center;gap:10px;cursor:pointer"> <input type="radio" name="photoOption" value="skip" id="photoSkip" style="cursor:pointer;width:18px;height:18px;accent-color:var(--accent)"> <span style="font-weight:600;color:var(--text)">Skip for Now</span> </label>
+        </div>
+        <div id="photoPreview" style="margin-top:16px;text-align:center;display:none">
+         <div style="width:120px;height:120px;border-radius:12px;background:linear-gradient(135deg,var(--accent),.15);margin:0 auto;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center">
+          <i data-lucide="camera" style="width:40px;height:40px;color:var(--text2)"></i>
+         </div>
+         <p style="color:var(--text2);font-size:13px;margin-top:12px">Photo will be captured during registration</p>
+        </div>
+       </div>
+      </div>
+     </form>
+    </div><!-- Modal Footer -->
+    <div style="display:flex;gap:12px;padding:24px;border-top:1px solid var(--border);justify-content:flex-end;flex-shrink:0;flex-wrap:wrap">
+     <button type="button" class="btn btn-outline" onclick="resetStudentForm()"><i data-lucide="rotate-ccw" style="width:16px;height:16px"></i> Reset</button> <button type="button" class="btn btn-danger" id="deleteStudentBtn" onclick="deleteCurrentStudent()" style="display:none"><i data-lucide="trash-2" style="width:16px;height:16px"></i> Delete</button> <button type="button" class="btn btn-outline" onclick="closeStudentModal()"><i data-lucide="x" style="width:16px;height:16px"></i> Cancel</button> <button type="submit" form="studentForm" class="btn btn-primary" id="submitStudentBtn"><i data-lucide="save" style="width:16px;height:16px"></i> Save Student</button>
+    </div>
+   </div>
+  </div><!-- Teacher Modal - Enhanced Form -->
+  <div class="modal-overlay" id="teacherModal" style="align-items:stretch;justify-content:center;padding:20px">
+   <div class="modal" style="max-width:1000px;width:100%;height:90%;max-height:90vh;padding:0;display:flex;flex-direction:column;border-radius:20px">
+    <!-- Modal Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:24px;border-bottom:1px solid var(--border);flex-shrink:0">
+     <div>
+      <h2 style="font-weight:800;font-size:22px" id="teacherModalTitle">Teacher Registration Form</h2>
+      <p style="color:var(--text2);font-size:13px;margin-top:4px">Fill in all teacher details below</p>
+     </div><button onclick="closeTeacherModal()" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:8px"><i data-lucide="x" style="width:24px;height:24px"></i></button>
+    </div><!-- Form Content -->
+    <div style="flex:1;overflow-y:auto;padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+     <form id="teacherForm" onsubmit="handleTeacherSubmit(event)" style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <input type="hidden" id="editTeacherIndex" value="-1"> <!-- LEFT SECTION: Department Information -->
+      <div style="grid-column:1/-1">
+       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:32px;height:32px;border-radius:10px;background:rgba(59,130,246,.15);display:flex;align-items:center;justify-content:center"><i data-lucide="building" style="width:18px;height:18px;color:var(--accent)"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:16px">Department Information</h3>
+       </div>
+       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;background:var(--glass);padding:20px;border-radius:14px;border:1px solid var(--border)">
+        <div>
+         <label for="tDepartment" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Department <span style="color:var(--accent)">*</span></label> <select id="tDepartment" required style="width:100%"><option value="">Select Department</option><option>Computer Science</option><option>Information Tech</option><option>Electronics</option><option>Mechanical</option></select>
+        </div>
+        <div>
+         <label for="tDesignation" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Designation <span style="color:var(--accent)">*</span></label> <select id="tDesignation" required style="width:100%"><option value="">Select Designation</option><option>Professor</option><option>Associate Professor</option><option>Assistant Professor</option><option>Lecturer</option></select>
+        </div>
+        <div>
+         <label for="tSpecialization" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Specialization</label> <input type="text" id="tSpecialization" placeholder="e.g., Artificial Intelligence" style="width:100%">
+        </div>
+        <div>
+         <label for="tExperience" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Experience (Years)</label> <input type="number" id="tExperience" placeholder="e.g., 5" min="0" style="width:100%">
+        </div>
+       </div>
+      </div><!-- MIDDLE SECTION: Teacher Information -->
+      <div style="grid-column:1/-1">
+       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:32px;height:32px;border-radius:10px;background:rgba(34,197,94,.15);display:flex;align-items:center;justify-content:center"><i data-lucide="user" style="width:18px;height:18px;color:var(--accent2)"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:16px">Personal Information</h3>
+       </div>
+       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;background:var(--glass);padding:20px;border-radius:14px;border:1px solid var(--border)">
+        <div>
+         <label for="tId" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Teacher ID <span style="color:var(--accent)">*</span></label> <input type="text" id="tId" placeholder="Auto-generated" readonly style="width:100%;background:var(--surface2);opacity:.7">
+        </div>
+        <div>
+         <label for="tName" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Full Name <span style="color:var(--accent)">*</span></label> <input type="text" id="tName" placeholder="e.g., Dr. Rajesh Kumar" required style="width:100%">
+        </div>
+        <div>
+         <label for="tGender" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Gender</label> <select id="tGender" style="width:100%"><option value="">Select Gender</option><option>Male</option><option>Female</option><option>Other</option></select>
+        </div>
+        <div>
+         <label for="tDOB" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Date of Birth</label> <input type="date" id="tDOB" style="width:100%">
+        </div>
+        <div>
+         <label for="tPhone" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Phone Number</label> <input type="tel" id="tPhone" placeholder="e.g., +91 9876543210" style="width:100%">
+        </div>
+        <div>
+         <label for="tEmail" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Email ID <span style="color:var(--accent)">*</span></label> <input type="email" id="tEmail" placeholder="e.g., rajesh@college.edu" required style="width:100%">
+        </div>
+        <div>
+         <label for="tOfficePhone" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Office Number</label> <input type="tel" id="tOfficePhone" placeholder="e.g., +91 1234567890" style="width:100%">
+        </div>
+        <div>
+         <label for="tQualification" style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">Qualification</label> <input type="text" id="tQualification" placeholder="e.g., PhD in Computer Science" style="width:100%">
+        </div>
+       </div>
+      </div><!-- PHOTO SECTION -->
+      <div style="grid-column:1/-1">
+       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:32px;height:32px;border-radius:10px;background:rgba(168,85,247,.15);display:flex;align-items:center;justify-content:center"><i data-lucide="camera" style="width:18px;height:18px;color:#a855f7"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:16px">Photo Sample</h3>
+       </div>
+       <div style="background:var(--glass);padding:20px;border-radius:14px;border:1px solid var(--border)">
+        <div style="display:flex;gap:24px">
+         <label style="display:flex;align-items:center;gap:10px;cursor:pointer"> <input type="radio" name="teacherPhotoOption" value="capture" id="teacherPhotoCapture" checked style="cursor:pointer;width:18px;height:18px;accent-color:var(--accent)"> <span style="font-weight:600;color:var(--text)">Capture Photo Sample</span> </label> <label style="display:flex;align-items:center;gap:10px;cursor:pointer"> <input type="radio" name="teacherPhotoOption" value="skip" id="teacherPhotoSkip" style="cursor:pointer;width:18px;height:18px;accent-color:var(--accent)"> <span style="font-weight:600;color:var(--text)">Skip for Now</span> </label>
+        </div>
+       </div>
+      </div>
+     </form>
+    </div><!-- Modal Footer -->
+    <div style="display:flex;gap:12px;padding:24px;border-top:1px solid var(--border);justify-content:flex-end;flex-shrink:0;flex-wrap:wrap">
+     <button type="button" class="btn btn-outline" onclick="resetTeacherForm()"><i data-lucide="rotate-ccw" style="width:16px;height:16px"></i> Reset</button> <button type="button" class="btn btn-danger" id="deleteTeacherBtn" onclick="deleteCurrentTeacher()" style="display:none"><i data-lucide="trash-2" style="width:16px;height:16px"></i> Delete</button> <button type="button" class="btn btn-outline" onclick="closeTeacherModal()"><i data-lucide="x" style="width:16px;height:16px"></i> Cancel</button> <button type="submit" form="teacherForm" class="btn btn-primary" id="submitTeacherBtn"><i data-lucide="save" style="width:16px;height:16px"></i> Save Teacher</button>
+    </div>
+   </div>
+  </div><!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+   <div class="modal" style="text-align:center">
+    <i data-lucide="alert-triangle" style="width:48px;height:48px;color:#ef4444;margin-bottom:16px"></i>
+    <h3 style="font-weight:700;font-size:18px;margin-bottom:8px">Confirm Delete</h3>
+    <p style="color:var(--text2);margin-bottom:24px">Are you sure you want to delete this student? This action cannot be undone.</p>
+    <div style="display:flex;gap:12px;justify-content:center">
+     <button class="btn btn-outline" onclick="document.getElementById('deleteModal').classList.remove('show')">Cancel</button> <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+   </div>
+  </div><!-- Toast -->
+  <div id="toast" class="toast"></div>
+ <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+ 
+ </html>
